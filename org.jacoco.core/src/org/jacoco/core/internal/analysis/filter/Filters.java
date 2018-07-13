@@ -34,7 +34,7 @@ public final class Filters implements IFilter {
 	public static IFilter all() {
 		return new Filters(new EnumFilter(), new SyntheticFilter(),
 				new BridgeFilter(), new SynchronizedFilter(),
-				new TryWithResourcesJavac11Filter(),
+				new TryWithResourcesJavac11Filter(), new AspectjFilter(),
 				new TryWithResourcesJavacFilter(),
 				new TryWithResourcesEcjFilter(), new FinallyFilter(),
 				new PrivateEmptyNoArgConstructorFilter(),
