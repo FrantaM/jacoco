@@ -13,24 +13,32 @@
 package org.jacoco.core.internal.analysis.filter;
 
 import org.jacoco.core.internal.instr.InstrSupport;
+import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.junit.Assert.*;
 
 public class AspectjFilterTest implements IFilterOutput {
 
-    private final AspectjFilter filter = new AspectjFilter();
+    private AspectjFilter filter;
 
     private final FilterContextMock context = new FilterContextMock();
 
-    private AbstractInsnNode fromInclusive;
-    private AbstractInsnNode toInclusive;
+    private Set<AbstractInsnNode> ignored;
+
+    @Before
+    public void setUp() {
+        filter = new AspectjFilter();
+        ignored = new HashSet<AbstractInsnNode>();
+    }
 
     @Test
     public void testAjSyntheticAttribute() {
@@ -43,8 +51,7 @@ public class AspectjFilterTest implements IFilterOutput {
 
         filter.filter(m, context, this);
 
-        assertEquals(m.instructions.getFirst(), fromInclusive);
-        assertEquals(m.instructions.getLast(), toInclusive);
+        assertTrue(ignored.containsAll(Arrays.asList(m.instructions.toArray())));
     }
 
     @Test
@@ -58,8 +65,7 @@ public class AspectjFilterTest implements IFilterOutput {
 
         filter.filter(m, context, this);
 
-        assertEquals(m.instructions.getFirst(), fromInclusive);
-        assertEquals(m.instructions.getLast(), toInclusive);
+        assertTrue(ignored.containsAll(Arrays.asList(m.instructions.toArray())));
     }
 
     @Test
@@ -74,9 +80,8 @@ public class AspectjFilterTest implements IFilterOutput {
 
         filter.filter(m, context, this);
 
-        assertEquals(m.instructions.getFirst(), fromInclusive);
-        assertEquals(toInclusive.getOpcode(), Opcodes.INVOKESTATIC);
-        assertEquals(((MethodInsnNode)toInclusive).name, "ajc$preClinit");
+        assertTrue(ignored.contains(m.instructions.getFirst()));
+        assertFalse(ignored.contains(m.instructions.getLast()));
     }
 
     @Test
@@ -90,8 +95,7 @@ public class AspectjFilterTest implements IFilterOutput {
 
         filter.filter(m, context, this);
 
-        assertEquals(m.instructions.getFirst(), fromInclusive);
-        assertEquals(m.instructions.getLast(), toInclusive);
+        assertTrue(ignored.containsAll(Arrays.asList(m.instructions.toArray())));
     }
 
     @Test
@@ -106,9 +110,8 @@ public class AspectjFilterTest implements IFilterOutput {
 
         filter.filter(m, context, this);
 
-        assertEquals(fromInclusive.getOpcode(), Opcodes.INVOKESTATIC);
-        assertEquals(((MethodInsnNode)fromInclusive).name, "ajc$postClinit");
-        assertEquals(m.instructions.getLast(), toInclusive);
+        assertFalse(ignored.contains(m.instructions.getFirst()));
+        assertTrue(ignored.contains(m.instructions.getLast()));
     }
 
     @Test
@@ -119,20 +122,23 @@ public class AspectjFilterTest implements IFilterOutput {
         m.visitMethodInsn(Opcodes.INVOKESTATIC, "Foo", "ajc$preClinit", "()V", false);
         m.visitInsn(Opcodes.NOP);
         m.visitMethodInsn(Opcodes.INVOKESTATIC, "Foo", "ajc$postClinit", "()V", false);
-        m.visitInsn(Opcodes.NOP);
         m.visitInsn(Opcodes.RETURN);
 
         filter.filter(m, context, this);
 
-        assertEquals(m.instructions.getFirst(), fromInclusive);
-        assertEquals(m.instructions.getLast(), toInclusive);
+        assertTrue(ignored.containsAll(Arrays.asList(m.instructions.toArray())));
     }
 
-    public void ignore(AbstractInsnNode fromInclusive,
-                       AbstractInsnNode toInclusive) {
-        this.fromInclusive = fromInclusive;
-        this.toInclusive = toInclusive;
+    public void ignore(final AbstractInsnNode fromInclusive,
+                       final AbstractInsnNode toInclusive) {
+        for (AbstractInsnNode i = fromInclusive; i != toInclusive; i = i
+                .getNext()) {
+            ignored.add(i);
+        }
+        ignored.add(toInclusive);
     }
+
+
 
     public void merge(final AbstractInsnNode i1, final AbstractInsnNode i2) {
         fail();
