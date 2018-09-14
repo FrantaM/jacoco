@@ -144,6 +144,10 @@ public class AspectjFilterTest implements IFilterOutput {
         fail();
     }
 
+    public void replaceBranches(AbstractInsnNode source, Set<AbstractInsnNode> newTargets) {
+
+    }
+
     private static class TestAttribute extends Attribute {
         TestAttribute(String type) {
             super(type);
