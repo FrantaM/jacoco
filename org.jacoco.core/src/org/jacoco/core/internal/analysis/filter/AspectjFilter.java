@@ -124,7 +124,9 @@ public class AspectjFilter implements IFilter {
 
         public AbstractInsnNode match() {
             cursor = methodNode.instructions.getFirst();
-            nextIs(Opcodes.INVOKESTATIC);
+            if (cursor.getOpcode() != Opcodes.INVOKESTATIC) {
+                nextIs(Opcodes.INVOKESTATIC);
+            }
             if (cursor == null || !((MethodInsnNode) cursor).name.equals("ajc$preClinit")) {
                 cursor = null;
                 return null;
@@ -159,8 +161,10 @@ public class AspectjFilter implements IFilter {
 
         public AbstractInsnNode match() {
             cursor = start;
-            nextIs(Opcodes.INVOKESTATIC);
-            if (!((MethodInsnNode) cursor).name.equals("ajc$postClinit")) {
+            if (cursor.getOpcode() != Opcodes.INVOKESTATIC) {
+                nextIs(Opcodes.INVOKESTATIC);
+            }
+            if (cursor == null || !((MethodInsnNode) cursor).name.equals("ajc$postClinit")) {
                 cursor = null;
                 return null;
             }
