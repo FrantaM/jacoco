@@ -77,8 +77,7 @@ public final class SyntheticFilter implements IFilter {
 	 * @see AspectjFilter
 	 */
 	private boolean isHandledByAspectJFilter(MethodNode methodNode) {
-		return ASPECTJ_AROUND_BODY_PATTERN.matcher(methodNode.name).matches()
-				&& methodNode.desc.contains("Lorg/aspectj/lang/JoinPoint");
+		return ASPECTJ_AROUND_BODY_PATTERN.matcher(methodNode.name).matches();
 	}
 
 }
