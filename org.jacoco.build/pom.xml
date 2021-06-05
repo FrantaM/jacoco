@@ -15,7 +15,7 @@
 
   <groupId>org.jacoco</groupId>
   <artifactId>org.jacoco.build</artifactId>
-  <version>0.8.7</version>
+  <version>0.8.7-710</version>
   <packaging>pom</packaging>
 
   <name>JaCoCo</name>
@@ -572,6 +572,7 @@
         <groupId>com.diffplug.spotless</groupId>
         <artifactId>spotless-maven-plugin</artifactId>
         <configuration>
+          <skip>true</skip>
           <java>
             <lineEndings>UNIX</lineEndings>
             <includes>
